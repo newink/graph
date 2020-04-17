@@ -15,7 +15,7 @@ public class Graph<T> {
 
     private final List<Edge<T>> edges = new ArrayList<>();
 
-    ReadWriteLock lock = new ReentrantReadWriteLock();
+    private final ReadWriteLock lock = new ReentrantReadWriteLock();
 
     public Graph(boolean directed) {
         this.directed = directed;
