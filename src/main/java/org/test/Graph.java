@@ -11,7 +11,7 @@ public class Graph<T> {
 
     private final boolean directed;
 
-    private final Map<Vertex<T>, List<Vertex<T>>> adjacencyList = new HashMap<>();
+    private final Map<Vertex<T>, List<Vertex<T>>> adjacencyMap = new HashMap<>();
 
     private final List<Edge<T>> edges = new ArrayList<>();
 
@@ -22,17 +22,17 @@ public class Graph<T> {
     }
 
     public void addVertex(T value) throws InterruptedException {
-        writeLock(() -> adjacencyList.putIfAbsent(new Vertex<>(value), new ArrayList<>()));
+        writeLock(() -> adjacencyMap.putIfAbsent(new Vertex<>(value), new ArrayList<>()));
     }
 
     public void addEdge(T value1, T value2) throws InterruptedException {
         writeLock(() -> {
             Vertex<T> v1 = new Vertex<>(value1);
             Vertex<T> v2 = new Vertex<>(value2);
-            adjacencyList.get(v1).add(v2);
+            adjacencyMap.get(v1).add(v2);
             edges.add(new Edge<>(v1, v2));
             if (!directed) {
-                adjacencyList.get(v2).add(v1);
+                adjacencyMap.get(v2).add(v1);
                 edges.add(new Edge<>(v2, v1));
             }
         });
@@ -43,7 +43,7 @@ public class Graph<T> {
             Vertex<T> v1 = new Vertex<>(val1);
             Vertex<T> v2 = new Vertex<>(val2);
 
-            if (!adjacencyList.containsKey(v1) || !adjacencyList.containsKey(v2)) {
+            if (!adjacencyMap.containsKey(v1) || !adjacencyMap.containsKey(v2)) {
                 throw new IllegalArgumentException("One of the vertices is absent");
             }
 
@@ -61,7 +61,7 @@ public class Graph<T> {
                 }
                 if (!visited.contains(vertex)) {
                     visited.add(vertex);
-                    for (Vertex<T> v : adjacencyList.get(vertex)) {
+                    for (Vertex<T> v : adjacencyMap.get(vertex)) {
                         stack.push(v);
                         parents.put(v, vertex);
                     }
@@ -84,11 +84,11 @@ public class Graph<T> {
 
     public void apply(Consumer<Vertex<T>> func) throws InterruptedException {
         writeLock(() -> {
-            if (adjacencyList.isEmpty()) {
+            if (adjacencyMap.isEmpty()) {
                 throw new IllegalArgumentException("Graph is empty");
             }
 
-            Vertex<T> root = new ArrayList<>(adjacencyList.keySet()).get(0);
+            Vertex<T> root = new ArrayList<>(adjacencyMap.keySet()).get(0);
             Set<Vertex<T>> visited = new LinkedHashSet<>();
             Stack<Vertex<T>> stack = new Stack<>();
             stack.push(root);
@@ -97,7 +97,7 @@ public class Graph<T> {
                 if (!visited.contains(vertex)) {
                     func.accept(vertex);
                     visited.add(vertex);
-                    for (Vertex<T> v : adjacencyList.get(vertex)) {
+                    for (Vertex<T> v : adjacencyMap.get(vertex)) {
                         stack.push(v);
                     }
                 }
