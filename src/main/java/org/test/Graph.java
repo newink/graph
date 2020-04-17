@@ -21,11 +21,11 @@ public class Graph<T> {
         this.directed = directed;
     }
 
-    public synchronized void addVertex(T value) throws InterruptedException {
+    public void addVertex(T value) throws InterruptedException {
         writeLock(() -> adjacencyList.putIfAbsent(new Vertex<>(value), new ArrayList<>()));
     }
 
-    public synchronized void addEdge(T value1, T value2) throws InterruptedException {
+    public void addEdge(T value1, T value2) throws InterruptedException {
         writeLock(() -> {
             Vertex<T> v1 = new Vertex<>(value1);
             Vertex<T> v2 = new Vertex<>(value2);
@@ -38,7 +38,7 @@ public class Graph<T> {
         });
     }
 
-    public synchronized List<Edge<T>> getPath(T val1, T val2) throws InterruptedException {
+    public List<Edge<T>> getPath(T val1, T val2) throws InterruptedException {
         return readLock(() -> {
             Vertex<T> v1 = new Vertex<>(val1);
             Vertex<T> v2 = new Vertex<>(val2);
@@ -82,7 +82,7 @@ public class Graph<T> {
         });
     }
 
-    public synchronized void apply(Consumer<Vertex<T>> func) throws InterruptedException {
+    public void apply(Consumer<Vertex<T>> func) throws InterruptedException {
         writeLock(() -> {
             if (adjacencyList.isEmpty()) {
                 throw new IllegalArgumentException("Graph is empty");
