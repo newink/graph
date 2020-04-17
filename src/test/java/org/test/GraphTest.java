@@ -1,6 +1,5 @@
 package org.test;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -10,12 +9,20 @@ import static org.junit.Assert.assertEquals;
 
 public class GraphTest {
 
-    private Graph<String> graph;
 
-    @Before
-    public void init() {
-        graph = new Graph<>();
+    public Graph<String> directedGraph() {
+        Graph<String> graph = new Graph<>(true);
+        addVertices(graph);
+        return graph;
+    }
 
+    public Graph<String> undirectedGraph() {
+        Graph<String> graph = new Graph<>(false);
+        addVertices(graph);
+        return graph;
+    }
+
+    private void addVertices(Graph<String> graph) {
         graph.addVertex("v1");
         graph.addVertex("v2");
         graph.addVertex("v3");
@@ -34,6 +41,7 @@ public class GraphTest {
 
     @Test
     public void testPathFound() {
+        Graph<String> graph = directedGraph();
         List<Edge<String>> path = graph.getPath("v1", "v6");
 
         assertEquals(path, new ArrayList<>() {{
@@ -44,14 +52,32 @@ public class GraphTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testPathToUnreachableNotFound() {
+        Graph<String> graph = directedGraph();
         String nodeName = "unreachable";
 
         graph.addVertex(nodeName);
         graph.getPath("v1", nodeName);
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void testReversePathIsNotFoundInDirected() {
+        Graph<String> graph = directedGraph();
+        graph.getPath("v6", "v1");
+    }
+
+    @Test
+    public void testReversePathIsFoundInUndirected() {
+        Graph<String> graph = undirectedGraph();
+        List<Edge<String>> path = graph.getPath("v6", "v1");
+        assertEquals(new ArrayList<>() {{
+            add(new Edge<>("v6", "v5"));
+            add(new Edge<>("v5", "v1"));
+        }}, path);
+    }
+
     @Test
     public void testFunctionIsApplied() {
+        Graph<String> graph = directedGraph();
         List<String> names = new ArrayList<>();
         graph.apply(stringVertex -> names.add(stringVertex.getValue()));
 

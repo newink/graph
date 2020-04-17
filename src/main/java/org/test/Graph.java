@@ -5,9 +5,15 @@ import java.util.function.Consumer;
 
 public class Graph<T> {
 
+    private final boolean directed;
+
     private final Map<Vertex<T>, List<Vertex<T>>> adjacencyList = new HashMap<>();
 
     private final List<Edge<T>> edges = new ArrayList<>();
+
+    public Graph(boolean directed) {
+        this.directed = directed;
+    }
 
     public synchronized void addVertex(T value) {
         adjacencyList.putIfAbsent(new Vertex<>(value), new ArrayList<>());
@@ -18,6 +24,10 @@ public class Graph<T> {
         Vertex<T> v2 = new Vertex<>(value2);
         adjacencyList.get(v1).add(v2);
         edges.add(new Edge<>(v1, v2));
+        if (!directed) {
+            adjacencyList.get(v2).add(v1);
+            edges.add(new Edge<>(v2, v1));
+        }
     }
 
     public synchronized List<Edge<T>> getPath(T val1, T val2) {
