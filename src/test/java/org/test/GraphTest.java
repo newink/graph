@@ -10,19 +10,19 @@ import static org.junit.Assert.assertEquals;
 public class GraphTest {
 
 
-    public Graph<String> directedGraph() {
+    public Graph<String> directedGraph() throws InterruptedException {
         Graph<String> graph = new Graph<>(true);
         addVertices(graph);
         return graph;
     }
 
-    public Graph<String> undirectedGraph() {
+    public Graph<String> undirectedGraph() throws InterruptedException {
         Graph<String> graph = new Graph<>(false);
         addVertices(graph);
         return graph;
     }
 
-    private void addVertices(Graph<String> graph) {
+    private void addVertices(Graph<String> graph) throws InterruptedException {
         graph.addVertex("v1");
         graph.addVertex("v2");
         graph.addVertex("v3");
@@ -40,7 +40,7 @@ public class GraphTest {
     }
 
     @Test
-    public void testPathFound() {
+    public void testPathFound() throws InterruptedException {
         Graph<String> graph = directedGraph();
         List<Edge<String>> path = graph.getPath("v1", "v6");
 
@@ -51,7 +51,7 @@ public class GraphTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testPathToUnreachableNotFound() {
+    public void testPathToUnreachableNotFound() throws InterruptedException {
         Graph<String> graph = directedGraph();
         String nodeName = "unreachable";
 
@@ -60,13 +60,13 @@ public class GraphTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testReversePathIsNotFoundInDirected() {
+    public void testReversePathIsNotFoundInDirected() throws InterruptedException {
         Graph<String> graph = directedGraph();
         graph.getPath("v6", "v1");
     }
 
     @Test
-    public void testReversePathIsFoundInUndirected() {
+    public void testReversePathIsFoundInUndirected() throws InterruptedException {
         Graph<String> graph = undirectedGraph();
         List<Edge<String>> path = graph.getPath("v6", "v1");
         assertEquals(new ArrayList<>() {{
@@ -76,7 +76,7 @@ public class GraphTest {
     }
 
     @Test
-    public void testFunctionIsApplied() {
+    public void testFunctionIsApplied() throws InterruptedException {
         Graph<String> graph = directedGraph();
         List<String> names = new ArrayList<>();
         graph.apply(stringVertex -> names.add(stringVertex.getValue()));

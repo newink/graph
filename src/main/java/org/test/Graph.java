@@ -1,6 +1,7 @@
 package org.test;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Consumer;
@@ -20,11 +21,11 @@ public class Graph<T> {
         this.directed = directed;
     }
 
-    public synchronized void addVertex(T value) {
+    public synchronized void addVertex(T value) throws InterruptedException {
         writeLock(() -> adjacencyList.putIfAbsent(new Vertex<>(value), new ArrayList<>()));
     }
 
-    public synchronized void addEdge(T value1, T value2) {
+    public synchronized void addEdge(T value1, T value2) throws InterruptedException {
         writeLock(() -> {
             Vertex<T> v1 = new Vertex<>(value1);
             Vertex<T> v2 = new Vertex<>(value2);
@@ -37,7 +38,7 @@ public class Graph<T> {
         });
     }
 
-    public synchronized List<Edge<T>> getPath(T val1, T val2) {
+    public synchronized List<Edge<T>> getPath(T val1, T val2) throws InterruptedException {
         return readLock(() -> {
             Vertex<T> v1 = new Vertex<>(val1);
             Vertex<T> v2 = new Vertex<>(val2);
@@ -81,7 +82,7 @@ public class Graph<T> {
         });
     }
 
-    public synchronized void apply(Consumer<Vertex<T>> func) {
+    public synchronized void apply(Consumer<Vertex<T>> func) throws InterruptedException {
         writeLock(() -> {
             if (adjacencyList.isEmpty()) {
                 throw new IllegalArgumentException("Graph is empty");
@@ -104,14 +105,14 @@ public class Graph<T> {
         });
     }
 
-    private void writeLock(Runnable runnable) {
-        lock.writeLock().lock();
+    private void writeLock(Runnable runnable) throws InterruptedException {
+        lock.writeLock().tryLock(5, TimeUnit.SECONDS);
         runnable.run();
         lock.writeLock().unlock();
     }
 
-    private <S> S readLock(Supplier<S> supplier) {
-        lock.readLock().lock();
+    private <S> S readLock(Supplier<S> supplier) throws InterruptedException {
+        lock.readLock().tryLock(5, TimeUnit.SECONDS);
         S s = supplier.get();
         lock.readLock().unlock();
         return s;
